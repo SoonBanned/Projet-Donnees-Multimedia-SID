@@ -13,7 +13,7 @@ import seaborn as sns
 custom_model = tf.keras.models.load_model("yamnet_custom_classifier.h5")
 
 # === 2. Charger YAMNet ===
-
+yamnet_model = hub.load('https://www.kaggle.com/models/google/yamnet/TensorFlow2/yamnet/1')
 # === 3. Fonctions utilitaires ===
 def ensure_sample_rate(original_sr, waveform, desired_sr=16000):
     """Rééchantillonne le signal si besoin."""
