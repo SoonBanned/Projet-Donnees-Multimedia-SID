@@ -1,10 +1,10 @@
 # Projet Master 2 SID
 
-## *Classification et Recherche Cross-Modale sur la collection MSR-VTT*
+## *Classification des données de la collection MSR-VTT*
 
 ## Introduction
 
-Ce projet s’inscrit dans le cadre de notre projet de Master 2 qui porte sur la classificationde vidéos à partir de la collection **MSR-VTT**, un jeu de données de référence en traitement de données multimédia.
+Ce projet s’inscrit dans le cadre de notre projet de Master 2 qui porte sur la classification de vidéos à partir de la collection **MSR-VTT**, un jeu de données de référence en traitement de données multimédia.
 
 ### Le Jeu de données
 
