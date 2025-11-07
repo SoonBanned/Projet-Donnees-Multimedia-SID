@@ -81,6 +81,46 @@ Cette approche permet une **modélisation fine des dynamiques visuelles** tout e
 
 #### 2. Audio
 
+La modalité **audio** vise à exploiter la bande sonore des vidéos afin d’enrichir la classification multimodale.  
+Cette étape s’articule en deux volets principaux : **l’extraction des pistes audio** et **l’apprentissage du modèle de classification sonore**.
+
+##### a. Extraction des pistes audio
+
+Pour chaque vidéo du corpus MSR-VTT, la piste audio est extraite à l’aide du script `extract audios.py`.  
+Ce script utilise **FFmpeg** pour convertir chaque fichier vidéo (`.mp4`, `.mov`, `.avi`, `.mkv`, etc.) en un fichier **WAV** non compressé.
+
+Les fichiers générés sont enregistrés dans le dossier `./audios/`, avec les paramètres suivants :
+- fréquence d’échantillonnage : **44,1 kHz**
+- nombre de canaux : **2 (stéréo)**
+- format : **PCM 16 bits (pcm_s16le)**
+
+Cette conversion garantit une qualité optimale pour l’extraction d’embeddings audio et une compatibilité totale avec les modèles basés sur TensorFlow et YAMNet.
+
+##### b. Extraction des descripteurs et classification
+
+L’étape suivante consiste à exploiter le contenu audio pour la classification.  
+Le script `execut_model_audio.py` met en œuvre un pipeline basé sur **YAMNet**, un réseau de neurones développé par Google pour la reconnaissance de sons génériques, préentraîné sur le dataset **AudioSet**.
+
+1. **Extraction des embeddings audio**  
+   Chaque fichier `.wav` est chargé et rééchantillonné à **16 kHz** pour correspondre aux exigences de YAMNet.  
+   Le modèle YAMNet extrait un **vecteur d’embedding** pour chaque segment audio, et la moyenne de ces vecteurs constitue la représentation globale du fichier.  
+
+2. **Classification supervisée**  
+   Un modèle personnalisé, `yamnet_custom_classifier.h5`, est ensuite chargé pour effectuer la classification finale.  
+   Ce modèle a été entraîné sur les embeddings YAMNet issus de l’ensemble d’entraînement, associés aux catégories du corpus MSR-VTT.  
+   Les prédictions sont comparées aux vraies étiquettes via un **rapport de classification** (précision, rappel, F1-score) et une **matrice de confusion** visualisée avec *Seaborn*.
+
+3. **Fichiers et organisation**  
+   - Les catégories sont définies dans `train_val_annotation/category.txt`  
+   - Les annotations de test sont lues depuis `test_videodatainfo.json/test_videodatainfo.json`  
+   - Les fichiers audio correspondants sont recherchés dans le répertoire `test_val_audios/`
+
+##### c. Résultats et remarques
+
+Le modèle YAMNet couplé au classifieur personnalisé permet d’obtenir une **bonne discrimination entre les 20 classes** audio-visuelles du corpus, notamment pour les catégories à signature sonore forte (musique, sport, discours, etc.).  
+Une matrice de confusion est produite pour analyser les confusions entre classes et orienter les ajustements futurs du modèle.
+
+
 #### 3. Texte
 
 ### Fusion pour la classification multimodale
