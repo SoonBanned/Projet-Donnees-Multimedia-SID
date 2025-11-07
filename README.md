@@ -187,53 +187,6 @@ La classification textuelle permet d’obtenir des performances solides uniqueme
 Le modèle ALBERT fine-tuné avec attention et agrégation de captions a été retenu pour la phase de fusion.
 
 
-## Méthodologie
-
-### Pipeline de traitement
-
-Le projet consiste à classifier des captions de vidéos en différentes catégories. La méthodologie suivie se déroule en plusieurs étapes :
-
-1. **Prétraitement des données**  
-   - Les captions sont tokenisées à l'aide des tokenizers de Transformers (DistilBERT ou ALBERT selon le modèle).  
-   - Les séquences sont tronquées ou paddées pour obtenir une longueur uniforme (`max_len=128`).  
-   - Optionnellement, les captions peuvent être **agrégées par vidéo**, en concaténant toutes les captions d’une même vidéo pour créer un contexte plus riche.
-
-2. **Jeux de données**  
-   - Les données sont divisées en ensembles `train`, `validation` et `test`.  
-   - Les labels sont convertis en indices numériques pour le training.  
-   - Des DataLoaders PyTorch permettent un traitement par batch efficace.
-
-3. **Modèles testés**  
-   Nous avons expérimenté avec **3 modèles principaux** :
-
-   - **Modèle 1 : LSTM avec DistilBERT gelé**  
-     DistilBERT est utilisé comme encodeur, mais ses poids sont gelés. La sortie est passée dans un LSTM profond à 4 couches suivi de plusieurs couches linéaires avec ReLU et Dropout.
-
-   - **Modèle 2 : ALBERT avec AttentionPooling (meilleur modèle)**  
-     ALBERT est entièrement fine-tuné.  
-     Chaque token est pondéré via un module **AttentionPooling**, qui calcule un score d’attention et crée un vecteur de contexte moyen.  
-     On concatène ce vecteur avec l’embedding avant de passer dans le classifieur final.  
-     Ce modèle supporte également l’**agrégation de toutes les captions d’une vidéo**, ce qui améliore la qualité de la représentation et la précision.  
-     Ce modèle a obtenu les meilleures performances en terme d’accuracy.
-
-   - **Modèle 3 : DistilBERT simple fine-tuné**  
-     DistilBERT est entièrement fine-tuné avec un classifieur simple à quelques couches linéaires. Rapide à entraîner et efficace sur de petits datasets.
-
-4. **Entraînement et évaluation**  
-   - Optimisation avec **AdamW** et scheduler de learning rate linéaire avec warmup.  
-   - Suivi de la **loss** et de l’**accuracy** à chaque epoch pour l’entraînement et la validation.  
-   - Évaluation finale sur le jeu de test avec affichage de la **matrice de confusion normalisée** et du rapport de classification.
-
-5. **Résultats et conclusion**  
-   - Le modèle ALBERT avec AttentionPooling et aggregation des captions est le plus performant.  
-   - L’utilisation de l’attention permet de mettre en valeur les tokens les plus importants, et l’agrégation apporte un contexte global pour chaque vidéo.  
-   - Une comparaison visuelle des performances des trois modèles est disponible ci-dessous :
-
-<p align="center">
-  <img src="/texte/comparaison_modele.png" alt="Comparaison des modèles" width="800">
-</p>
-
-
 
 ### Fusion pour la classification multimodale
 
