@@ -41,7 +41,7 @@ Le projet s’articule autour de plusieurs étapes clés :
 
 Pour réaliser les différentes tâches, nous avons adopter des méthodologies différentes selon la modalité concernée.
 
-#### 1. Vidéo
+#### 1. **Vidéo**
 
 La modalité vidéo constitue le cœur du projet, permettant d’exploiter la composante visuelle et temporelle des vidéos du corpus **MSR-VTT**.
 
@@ -79,7 +79,7 @@ Cette approche permet une **modélisation fine des dynamiques visuelles** tout e
 
 
 
-#### 2. Audio
+#### 2. **Audio**
 
 La modalité **audio** vise à exploiter la bande sonore des vidéos afin d’enrichir la classification multimodale.  
 Cette étape s’articule en deux volets principaux : **l’extraction des pistes audio** et **l’apprentissage du modèle de classification sonore**.
@@ -121,7 +121,7 @@ Le modèle YAMNet couplé au classifieur personnalisé permet d’obtenir une **
 Une matrice de confusion est produite pour analyser les confusions entre classes et orienter les ajustements futurs du modèle.
 
 
-#### 3. Texte
+#### 3. **Texte**
 
 La modalité **texte** repose sur l’exploitation des descriptions associées aux vidéos (captions) fournies dans les fichiers JSON du corpus **MSR-VTT**.  
 L’objectif est de prédire la catégorie d’une vidéo à partir de ces descriptions en utilisant des modèles de traitement du langage naturel (NLP) basés sur les Transformers.
