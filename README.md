@@ -43,6 +43,42 @@ Pour réaliser les différentes tâches, nous avons adopter des méthodologies d
 
 #### 1. Vidéo
 
+La modalité vidéo constitue le cœur du projet, permettant d’exploiter la composante visuelle et temporelle des vidéos du corpus **MSR-VTT**.
+
+Nous avons conçu un pipeline complet d’extraction et de classification vidéo, articulé en deux étapes principales :
+
+##### a. Extraction des caractéristiques visuelles et temporelles
+
+L’extraction repose sur un système hybride combinant plusieurs réseaux pré-entraînés :
+- **MViT (Multiscale Vision Transformer)** : capture les dépendances spatio-temporelles sur des séquences de 16 à 64 frames.
+- **ResNet (frame centrale)** : extrait un embedding global à partir de la frame médiane de la vidéo.
+- **Flux optique (Optical Flow – TV-L1)** : encode le mouvement entre frames via un CNN basé sur ResNet18.
+
+Les frames sont échantillonnées de manière *uniforme* ou *aléatoire* selon la configuration, et les embeddings issus de chaque composant sont concaténés pour former un vecteur global de caractéristiques.  
+Les descripteurs résultants sont sauvegardés dans le répertoire `features_finetuned/` et servent d’entrée au classifieur.
+
+##### b. Classification vidéo
+
+Le modèle de classification repose sur une architecture **LSTM bidirectionnelle avec couche de self-attention (SA-LSTM)**.  
+L’entrée du modèle est le vecteur de caractéristiques fusionné de dimension `5632`, correspondant à la concaténation des embeddings extraits par les modèles **MViT**, **ResNet** et **Flow**.
+
+La tête de classification comprend :
+- un **LSTM à 2 couches** (dimension cachée = 384),
+- une **couche d’attention** (dimension = 256),
+- une régularisation par **Dropout (0.5)**, **Label smoothing (0.05)** et **MixUp (0.1)**.
+
+L’entraînement a été effectué sur GPU avec :
+- une stratégie d’**early stopping** (patience = 15),
+- un **scheduler adaptatif** sur le taux d’apprentissage (facteur = 0.5, patience = 5),
+- et une **pondération de classes** via `WeightedRandomSampler` pour équilibrer les données.
+
+Les poids des modèles fine-tunés sont enregistrés sous les fichiers :  
+`mvit_tuned.pt`, `resnet_tuned.pt`, `flow_tuned.pt`, `head_tuned.pt`, et le meilleur modèle SA-LSTM sous `best_sa_lstm_53,1.pt`.
+
+Cette approche permet une **modélisation fine des dynamiques visuelles** tout en limitant le surapprentissage grâce à une régularisation contrôlée et une fusion multimodale optimisée.
+
+
+
 #### 2. Audio
 
 #### 3. Texte
