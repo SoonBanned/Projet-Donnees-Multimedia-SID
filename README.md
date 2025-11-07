@@ -123,6 +123,70 @@ Une matrice de confusion est produite pour analyser les confusions entre classes
 
 #### 3. Texte
 
+La modalité **texte** repose sur l’exploitation des descriptions associées aux vidéos (captions) fournies dans les fichiers JSON du corpus **MSR-VTT**.  
+L’objectif est de prédire la catégorie d’une vidéo à partir de ces descriptions en utilisant des modèles de traitement du langage naturel (NLP) basés sur les Transformers.
+
+##### a. Préparation et prétraitement des données
+
+Les fichiers `train_videodatainfo.json` et `test_videodatainfo.json` contiennent, pour chaque vidéo, plusieurs descriptions textuelles rédigées par des annotateurs humains.  
+Les étapes suivantes ont été réalisées :
+
+- Extraction des **descriptions** et **catégories** associées à chaque vidéo.  
+- Nettoyage des textes : mise en minuscules, suppression de la ponctuation et des caractères spéciaux.  
+- Tokenisation à l’aide du tokenizer associé au modèle choisi (**DistilBERT** ou **ALBERT**).  
+- Padding et troncature à une longueur fixe (`max_len = 128`).  
+- Encodage des labels en indices numériques et génération de DataLoaders pour l’entraînement, la validation et le test.
+
+Une variante a également été testée consistant à **concaténer toutes les captions d’une même vidéo** pour former un texte unique, permettant ainsi de capturer davantage de contexte.
+
+##### b. Modèles de classification
+
+Trois architectures principales ont été explorées :
+
+1. **DistilBERT + LSTM (encodeur gelé)**  
+   DistilBERT est utilisé uniquement comme générateur d’embeddings statiques.  
+   Ces embeddings sont ensuite passés dans un **LSTM profond à 4 couches** et un classifieur linéaire.  
+   Cette approche permet de tester la capacité du modèle séquentiel à capter la dynamique textuelle sans ajuster les poids du Transformer.
+
+2. **ALBERT + AttentionPooling (modèle final retenu)**  
+   Le modèle **ALBERT** est entièrement fine-tuné.  
+   Une couche **AttentionPooling** calcule un poids pour chaque token afin de produire un vecteur de contexte pondéré, mettant en avant les mots les plus pertinents.  
+   Ce vecteur est concaténé avec l’embedding CLS avant la classification finale.  
+   L’ajout d’une agrégation des captions par vidéo améliore sensiblement les performances globales.
+
+3. **DistilBERT fine-tuné (classifieur simple)**  
+   DistilBERT est fine-tuné de bout en bout avec une tête linéaire légère.  
+   Ce modèle constitue un bon compromis rapidité/précision, particulièrement adapté aux jeux de données plus restreints.
+
+##### c. Entraînement et évaluation
+
+L’entraînement est réalisé sous **PyTorch** avec l’optimiseur **AdamW**, un scheduler linéaire avec *warmup* et un suivi de la **loss** et de l’**accuracy** à chaque epoch.  
+Des techniques de régularisation comme **Dropout** et **Weight Decay** sont utilisées pour limiter le surapprentissage.
+
+Les performances sont évaluées sur le jeu de test à l’aide d’une **matrice de confusion normalisée** et d’un **rapport de classification (précision, rappel, F1-score)**.
+
+##### d. Résultats
+
+- Le modèle **ALBERT + AttentionPooling** est le plus performant, offrant la meilleure précision et stabilité.  
+- L’**agrégation des captions par vidéo** renforce la cohérence des représentations textuelles.  
+- L’attention permet d’identifier les mots discriminants dans la phrase (par ex. “soccer”, “cooking”, “music performance”…).  
+
+Une comparaison visuelle des trois modèles est illustrée ci-dessous :
+
+<p align="center">
+  <img src="/texte/comparaison_modele.png" alt="Comparaison des modèles" width="800">
+</p>
+
+Les poids du meilleur modèle sont sauvegardés sous `best_model.pt`, et le dossier `finetuned_bert/` contient les checkpoints intermédiaires et le tokenizer utilisé.
+
+---
+
+### Résumé
+
+La classification textuelle permet d’obtenir des performances solides uniquement à partir des descriptions, et fournit une base complémentaire aux autres modalités (audio, vidéo) pour la **fusion multimodale**.  
+Le modèle ALBERT fine-tuné avec attention et agrégation de captions a été retenu pour la phase de fusion.
+
+
 ## Méthodologie
 
 ### Pipeline de traitement
