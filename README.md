@@ -165,7 +165,10 @@ Le projet consiste à classifier des captions de vidéos en différentes catégo
    - L’utilisation de l’attention permet de mettre en valeur les tokens les plus importants, et l’agrégation apporte un contexte global pour chaque vidéo.  
    - Une comparaison visuelle des performances des trois modèles est disponible ci-dessous :
 
-![Comparaison des modèles](/texte/comparaison_modele.png)
+<p align="center">
+  <img src="/texte/comparaison_modele.png" alt="Comparaison des modèles" width="800">
+</p>
+
 
 
 ### Fusion pour la classification multimodale
